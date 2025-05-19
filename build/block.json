@@ -1,0 +1,57 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "sp/sp-recent-post-showcase",
+  "version": "0.1.0",
+  "title": "Recent post Showcase",
+  "category": "widgets",
+  "icon": "grid-view",
+  "description": "A block for displaying a grid of posts.",
+  "example": {},
+  "supports": {
+    "align": [
+      "wide"
+    ],
+    "html": false,
+    "color": {
+      "text": true,
+      "background": true
+    },
+    "spacing": {
+      "padding": [
+        "top",
+        "bottom"
+      ]
+    }
+  },
+  "attributes": {
+    "numberOfPosts": {
+      "type": "number",
+      "default": 4
+    },
+    "layout": {
+      "type": "string",
+      "default": "grid"
+    },
+    "showPostImage": {
+      "type": "boolean",
+      "default": true
+    },
+    "showPostAuthor": {
+      "type": "boolean",
+      "default": true
+    },
+    "linkToAuthorPage": {
+      "type": "boolean",
+      "default": true
+    },
+    "showPostDate": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "textdomain": "sp-recent-post-showcase",
+  "editorScript": "file:./index.js",
+  "style": "file:./style-index.css",
+  "render": "file:./render.php"
+}
