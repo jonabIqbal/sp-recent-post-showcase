@@ -17,6 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+define( 'SP_RECENT_POST_SHOWCASE_URL', plugin_dir_url( __FILE__ ) );
+define( 'SP_RECENT_POST_SHOWCASE_VERSION', '0.1.0' );
 /**
  * Registers the block using the metadata loaded from the `block.json` file.
  * Behind the scenes, it registers also all assets so they can be enqueued
@@ -24,14 +26,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @see https://developer.wordpress.org/reference/functions/register_block_type/
  */
-function sp_post_grid_block_block_init() {
+function sp_recent_post_showcase_init() {
 	register_block_type( __DIR__ . '/build' );
 }
-add_action( 'init', 'sp_post_grid_block_block_init' );
+add_action( 'init', 'sp_recent_post_showcase_init' );
 
 
-function enqueue_swiper_assets() {
-	wp_enqueue_style( 'swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css' );
-	wp_enqueue_script( 'swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js', [], null, true );
+function sp_recent_post_showcase_assets() {
+	wp_enqueue_style( 'sp-swiper-css', plugin_dir_url( __FILE__ ) . '/assets/css/swiper.min.css', array(), '0.1.0' );
+	wp_enqueue_script( 'sp-swiper-js', plugin_dir_url( __FILE__ ) . '/assets/js/swiper.min.js', array(), '0.1.0', false );
 }
-add_action( 'wp_enqueue_scripts', 'enqueue_swiper_assets' );
+add_action( 'wp_enqueue_scripts', 'sp_recent_post_showcase_assets' );

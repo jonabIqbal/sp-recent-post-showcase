@@ -158,7 +158,7 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 			</InspectorControls>
 			<div {...blockProps}>
 				{layout !== 'carousel' && (
-					<div className="grid-wraper-parent">
+					<div className="grid-wrapper-parent">
 						<div className={`sp-post-grid-wrapper ${layout}-layout`} style={{ gridTemplateColumns: `repeat(${gridColumn}, 1fr)` }}>
 							{posts && posts.map((post, index) => (
 								<div key={post.id} className="sp-post-item">
@@ -306,6 +306,8 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 								</div>
 							</SwiperSlide>
 						))}
+						<div className="swiper-button-prev"></div>
+						<div className="swiper-button-next"></div>
 					</Swiper>)}
 			</div >
 		</>
