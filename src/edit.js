@@ -306,8 +306,8 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 								</div>
 							</SwiperSlide>
 						))}
-						<div className="swiper-button-prev"></div>
-						<div className="swiper-button-next"></div>
+						<div className="swiper-button-prev" ref={swiperNavPrevRef} ></div>
+						<div className="swiper-button-next" ref={swiperNavNextRef}></div>
 					</Swiper>)}
 			</div >
 		</>

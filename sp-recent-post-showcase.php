@@ -30,10 +30,3 @@ function sp_recent_post_showcase_init() {
 	register_block_type( __DIR__ . '/build' );
 }
 add_action( 'init', 'sp_recent_post_showcase_init' );
-
-
-function sp_recent_post_showcase_assets() {
-	wp_enqueue_style( 'sp-swiper-css', plugin_dir_url( __FILE__ ) . '/assets/css/swiper.min.css', array(), '0.1.0' );
-	wp_enqueue_script( 'sp-swiper-js', plugin_dir_url( __FILE__ ) . '/assets/js/swiper.min.js', array(), '0.1.0', false );
-}
-add_action( 'wp_enqueue_scripts', 'sp_recent_post_showcase_assets' );

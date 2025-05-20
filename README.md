@@ -9,8 +9,3 @@ In order to test this block, simply follow these steps. Please note that you nee
 1. Clone this repository into the plugins directory of a local WordPress installation.
 2. Navigate to the root directory of this block and run `npm install`.
 3. Run `npm run build` to build the block, or `npm start` to start a development process and watch the files.
-
-### Screenshot
-Here's an example of this block being used in the Twenty Twenty-Four theme.
-
-![Screenshot of the block, rendered on the front end](./screenshot.png)
