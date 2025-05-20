@@ -27,11 +27,18 @@
 	"attributes": {
 		"numberOfPosts": {
 			"type": "number",
-			"default": 4
+			"default": 10
 		},
 		"gridColumn": {
 			"type": "number",
 			"default": 4
+		},
+		"selectedPostType": {
+			"type": "string",
+			"default": "post"
+		},
+		"uniqueId": {
+			"type": "string"
 		},
 		"selectedCategory": {
 			"type": "number",
@@ -42,6 +49,10 @@
 			"default": "grid"
 		},
 		"showPostImage": {
+			"type": "boolean",
+			"default": true
+		},
+		"showPostContent": {
 			"type": "boolean",
 			"default": true
 		},

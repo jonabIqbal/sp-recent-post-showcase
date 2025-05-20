@@ -39,6 +39,9 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 		layout,
 		gridColumn,
 		selectedCategory,
+		selectedPostType,
+		showPostContent,
+		uniqueId,
 		showPostImage
 	} = attributes
 	const swiperDotsRef = useRef(null);
@@ -50,21 +53,20 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 	);
 	const blockProps = useBlockProps();
 	const posts = useSelect(select => {
-		return select('core').getEntityRecords('postType', 'post', {
+		return select('core').getEntityRecords('postType', selectedPostType, {
 			per_page: numberOfPosts,
-			categories: attributes.selectedCategory || undefined,
+			categories: selectedCategory || undefined,
 		})
-	}, [numberOfPosts, attributes.selectedCategory])
+	}, [numberOfPosts, selectedCategory, selectedPostType]);
+
 	const media = useSelect(select => {
 		if (!posts) {
 			return []
 		}
-
 		return posts.map(post => {
 			if (!post.featured_media) {
 				return null
 			}
-
 			return select('core').getMedia(post.featured_media)
 		})
 	}, [posts])
@@ -73,24 +75,47 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 		if (!posts || !showPostAuthor) {
 			return []
 		}
-
 		return posts.map(post => {
 			if (!post.author) {
 				return null
 			}
-
 			return select('core').getUsers({ who: 'authors', include: [post.author] })
 		})
 	}, [posts, showPostAuthor])
+	//  All layout object.
 	const layouts = [
 		{ label: 'Grid', value: 'grid', tooltip: 'Grid style layout' },
 		{ label: 'List', value: 'list', tooltip: 'List style layout' },
 		{ label: 'Carousel', value: 'carousel', tooltip: 'Carousel layout' },
 	];
+	const postTypes = useSelect(select => {
+		return select('core').getPostTypes({ per_page: -1 })?.filter(
+			(type) =>
+				type.viewable &&
+				type.slug !== 'attachment' &&
+				type.slug !== 'wp_block'
+		);
+	}, []);
+	if (!uniqueId) {
+		setAttributes({ uniqueId: clientId });
+	}
 	return (
 		<>
 			<InspectorControls>
 				<PanelBody title={__('Settings', 'sp-recent-post-showcase')}>
+					<SelectControl
+						label={__('Select Post Type', 'sp-recent-post-showcase')}
+						value={selectedPostType}
+						options={
+							(postTypes || []).map(postType => ({
+								label: postType.labels.singular_name,
+								value: postType.slug,
+							}))
+						}
+						onChange={(value) => setAttributes({ selectedPostType: value })}
+					/>
+
+
 					<ButtonGroup
 						className={`sp-team-button-group sp-team-component-mb`}
 					>
@@ -136,6 +161,11 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 						label={__('Show post image', 'sp-recent-post-showcase')}
 						checked={showPostImage}
 						onChange={(value) => setAttributes({ showPostImage: value })}
+					/>
+					<ToggleControl
+						label={__('Show post Content', 'sp-recent-post-showcase')}
+						checked={showPostContent}
+						onChange={(value) => setAttributes({ showPostContent: value })}
 					/>
 					<ToggleControl
 						label={__('Show post author', 'sp-recent-post-showcase')}
@@ -190,7 +220,7 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 														className="sp-post-date"
 														dateTime={post.date}
 													>
-														{__('On', 'sp-recent-post-showcase')} {new Date(post.date).toLocaleDateString(undefined, {
+														{__(' On', 'sp-recent-post-showcase')} {new Date(post.date).toLocaleDateString(undefined, {
 															year: 'numeric',
 															month: 'long',
 															day: 'numeric',
@@ -200,7 +230,8 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 											</div>
 										)}
 
-										<div className="sp-post-content" dangerouslySetInnerHTML={{ __html: post.excerpt.rendered }} />
+
+										{showPostContent ? (<div className="sp-post-content" dangerouslySetInnerHTML={{ __html: post.excerpt.rendered }} />): null}
 
 										<div className="sp-post-btn">
 											<a className="sp-post-read-more" href={post.link}>
@@ -295,7 +326,7 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 											</div>
 										)}
 
-										<div className="sp-post-content" dangerouslySetInnerHTML={{ __html: post.excerpt.rendered }} />
+										{showPostContent ? (<div className="sp-post-content" dangerouslySetInnerHTML={{ __html: post.excerpt.rendered }} />) : null}
 
 										<div className="sp-post-btn">
 											<a className="sp-post-read-more" href={post.link}>
