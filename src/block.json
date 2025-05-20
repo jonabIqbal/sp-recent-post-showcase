@@ -9,20 +9,33 @@
 	"description": "A block for displaying a grid of posts.",
 	"example": {},
 	"supports": {
-		"align": ["wide"],
+		"align": [
+			"wide"
+		],
 		"html": false,
 		"color": {
 			"text": true,
 			"background": true
 		},
 		"spacing": {
-			"padding": ["top", "bottom"]
+			"padding": [
+				"top",
+				"bottom"
+			]
 		}
 	},
 	"attributes": {
 		"numberOfPosts": {
 			"type": "number",
 			"default": 4
+		},
+		"gridColumn": {
+			"type": "number",
+			"default": 4
+		},
+		"selectedCategory": {
+			"type": "number",
+			"default": 0
 		},
 		"layout": {
 			"type": "string",

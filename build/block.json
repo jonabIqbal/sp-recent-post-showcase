@@ -29,6 +29,14 @@
       "type": "number",
       "default": 4
     },
+    "gridColumn": {
+      "type": "number",
+      "default": 4
+    },
+    "selectedCategory": {
+      "type": "number",
+      "default": 0
+    },
     "layout": {
       "type": "string",
       "default": "grid"

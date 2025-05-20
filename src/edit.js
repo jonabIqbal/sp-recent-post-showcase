@@ -5,31 +5,56 @@ import {
 	Button,
 	ButtonGroup,
 	__experimentalNumberControl as NumberControl,
-	ToggleControl
+	ToggleControl,
+	RangeControl,
+	SelectControl
 } from '@wordpress/components'
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data'
 import parse from 'html-react-parser'
 import { Swiper, SwiperSlide } from 'swiper/react'
+import {
+	Navigation,
+	Pagination,
+	Grid,
+	Autoplay,
+	Scrollbar,
+	Keyboard,
+	Mousewheel,
+	EffectFade,
+	EffectCoverflow,
+	EffectFlip,
+	EffectCube,
+	FreeMode,
+} from 'swiper/modules';
 import 'swiper/css' // Core Swiper CSS
-import 'swiper/css/navigation'
-import 'swiper/css/pagination'
-import SwiperCore, { Navigation, Pagination } from 'swiper'
+import 'swiper/css/bundle'
 // Register modules
-SwiperCore.use([Navigation, Pagination])
-export default function Edit({ attributes, setAttributes }) {
+export default function Edit({ attributes, setAttributes, clientId, isSelected }) {
 	const {
 		numberOfPosts,
 		showPostAuthor,
 		linkToAuthorPage,
 		showPostDate,
 		layout,
+		gridColumn,
+		selectedCategory,
 		showPostImage
 	} = attributes
-
+	const swiperDotsRef = useRef(null);
+	const swiperNavNextRef = useRef(null);
+	const swiperNavPrevRef = useRef(null);
+	const categories = useSelect(select =>
+		select('core').getEntityRecords('taxonomy', 'category', { per_page: -1 }),
+		[]
+	);
+	const blockProps = useBlockProps();
 	const posts = useSelect(select => {
-		return select('core').getEntityRecords('postType', 'post', { per_page: numberOfPosts })
-	}, [numberOfPosts])
-
+		return select('core').getEntityRecords('postType', 'post', {
+			per_page: numberOfPosts,
+			categories: attributes.selectedCategory || undefined,
+		})
+	}, [numberOfPosts, attributes.selectedCategory])
 	const media = useSelect(select => {
 		if (!posts) {
 			return []
@@ -58,14 +83,14 @@ export default function Edit({ attributes, setAttributes }) {
 		})
 	}, [posts, showPostAuthor])
 	const layouts = [
-		{ label: 'grid', value: 'grid', tooltip: 'Grid style layout' },
-		{ label: 'list', value: 'list', tooltip: 'List style layout' },
-		{ label: 'carousel', value: 'carousel', tooltip: 'Carousel layout' },
+		{ label: 'Grid', value: 'grid', tooltip: 'Grid style layout' },
+		{ label: 'List', value: 'list', tooltip: 'List style layout' },
+		{ label: 'Carousel', value: 'carousel', tooltip: 'Carousel layout' },
 	];
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={__('Block settings', 'sp-recent-post-showcase')}>
+				<PanelBody title={__('Settings', 'sp-recent-post-showcase')}>
 					<ButtonGroup
 						className={`sp-team-button-group sp-team-component-mb`}
 					>
@@ -83,11 +108,29 @@ export default function Edit({ attributes, setAttributes }) {
 							}
 						</div>
 					</ButtonGroup>
-
+					<RangeControl
+						label={__('Columns', 'team-member-profile')}
+						value={gridColumn}
+						onChange={(value) => setAttributes({ gridColumn: value })}
+						min={1}
+						max={6}
+					/>
 					<NumberControl
 						label={__('Number of posts to display', 'sp-recent-post-showcase')}
 						value={numberOfPosts}
 						onChange={(value) => setAttributes({ numberOfPosts: parseInt(value) })}
+					/>
+					<SelectControl
+						label={__('Filter by Category', 'sp-recent-post-showcase')}
+						value={selectedCategory}
+						options={[
+							{ label: __('All Categories', 'sp-recent-post-showcase'), value: 0 },
+							...(categories || []).map(cat => ({
+								label: cat.name,
+								value: cat.id,
+							})),
+						]}
+						onChange={(value) => setAttributes({ selectedCategory: parseInt(value) })}
 					/>
 					<ToggleControl
 						label={__('Show post image', 'sp-recent-post-showcase')}
@@ -113,126 +156,158 @@ export default function Edit({ attributes, setAttributes }) {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<div {...useBlockProps()}>
-				<div className="styble-post-grid-wrapper">
-					{posts && posts.map((post, index) => (
-						<div key={post.id} className="styble-post-item">
-							{showPostImage && media && media[index] ? (
-								<div className="styble-post-image">
-									<img src={media[index].source_url} alt={media[index].alt_text} />
-								</div>
-							) : null}
-
-							<div className="styble-post-body">
-								<h2 className="styble-post-title">
-									<a href={post.link}>{parse(post.title.rendered)}</a>
-								</h2>
-
-								{(showPostAuthor || showPostDate) && (
-									<div className="styble-post-meta">
-										{showPostAuthor && authors && authors[index] ? (
-											<span className="styble-post-author">
-												{__('By', 'sp-recent-post-showcase')} {linkToAuthorPage ? (
-													<a href={authors[index][0].link}>{authors[index][0].name}</a>
-												) : (
-													<span>{authors[index][0].name}</span>
-												)}
-											</span>
-										) : null}
-
-										{showPostDate ? (
-											<time
-												className="styble-post-date"
-												dateTime={post.date}
-											>
-												{__('On', 'sp-recent-post-showcase')} {new Date(post.date).toLocaleDateString(undefined, {
-													year: 'numeric',
-													month: 'long',
-													day: 'numeric',
-												})}
-											</time>
-										) : null}
-									</div>
-								)}
-
-								<div className="styble-post-content" dangerouslySetInnerHTML={{ __html: post.excerpt.rendered }} />
-
-								<div className="styble-post-btn">
-									<a className="styble-post-read-more" href={post.link}>
-										<span>{__('Read More', 'sp-recent-post-showcase')}</span>
-									</a>
-								</div>
-							</div>
-						</div>
-
-					))}
-				</div>
-				{/* <Swiper
-					spaceBetween={30}
-					slidesPerView={3}
-					navigation={true}
-					pagination={{ clickable: true }}
-					breakpoints={{
-						640: { slidesPerView: 1 },
-						768: { slidesPerView: 2 },
-						1024: { slidesPerView: 3 }
-					}}
-					autoPlay={true}
-				>
-					{posts && posts.map((post, index) => (
-						<SwiperSlide key={post.id}>
-							<div className="styble-post-item">
-								{showPostImage && media && media[index] ? (
-									<div className="styble-post-image">
-										<img src={media[index].source_url} alt={media[index].alt_text} />
-									</div>
-								) : null}
-
-								<div className="styble-post-body">
-									<h2 className="styble-post-title">
-										<a href={post.link}>{parse(post.title.rendered)}</a>
-									</h2>
-
-									{(showPostAuthor || showPostDate) && (
-										<div className="styble-post-meta">
-											{showPostAuthor && authors && authors[index] ? (
-												<span className="styble-post-author">
-													{__('By', 'sp-recent-post-showcase')} {linkToAuthorPage ? (
-														<a href={authors[index][0].link}>{authors[index][0].name}</a>
-													) : (
-														<span>{authors[index][0].name}</span>
-													)}
-												</span>
-											) : null}
-
-											{showPostDate ? (
-												<time
-													className="styble-post-date"
-													dateTime={post.date}
-												>
-													{__('On', 'sp-recent-post-showcase')} {new Date(post.date).toLocaleDateString(undefined, {
-														year: 'numeric',
-														month: 'long',
-														day: 'numeric',
-													})}
-												</time>
-											) : null}
+			<div {...blockProps}>
+				{layout !== 'carousel' && (
+					<div className="grid-wraper-parent">
+						<div className={`sp-post-grid-wrapper ${layout}-layout`} style={{ gridTemplateColumns: `repeat(${gridColumn}, 1fr)` }}>
+							{posts && posts.map((post, index) => (
+								<div key={post.id} className="sp-post-item">
+									{showPostImage && media && media[index] ? (
+										<div className="sp-post-image">
+											<img src={media[index].source_url} alt={media[index].alt_text} />
 										</div>
-									)}
+									) : null}
 
-									<div className="styble-post-content" dangerouslySetInnerHTML={{ __html: post.excerpt.rendered }} />
+									<div className="sp-post-body">
+										<h2 className="sp-post-title">
+											<a href={post.link}>{parse(post.title.rendered)}</a>
+										</h2>
 
-									<div className="styble-post-btn">
-										<a className="styble-post-read-more" href={post.link}>
-											<span>{__('Read More', 'sp-recent-post-showcase')}</span>
-										</a>
+										{(showPostAuthor || showPostDate) && (
+											<div className="sp-post-meta">
+												{showPostAuthor && authors && authors[index] ? (
+													<span className="sp-post-author">
+														{__('By', 'sp-recent-post-showcase')} {linkToAuthorPage ? (
+															<a href={authors[index][0].link}>{authors[index][0].name}</a>
+														) : (
+															<span>{authors[index][0].name}</span>
+														)}
+													</span>
+												) : null}
+
+												{showPostDate ? (
+													<time
+														className="sp-post-date"
+														dateTime={post.date}
+													>
+														{__('On', 'sp-recent-post-showcase')} {new Date(post.date).toLocaleDateString(undefined, {
+															year: 'numeric',
+															month: 'long',
+															day: 'numeric',
+														})}
+													</time>
+												) : null}
+											</div>
+										)}
+
+										<div className="sp-post-content" dangerouslySetInnerHTML={{ __html: post.excerpt.rendered }} />
+
+										<div className="sp-post-btn">
+											<a className="sp-post-read-more" href={post.link}>
+												<span>{__('Read More', 'sp-recent-post-showcase')}</span>
+											</a>
+										</div>
 									</div>
 								</div>
-							</div>
-						</SwiperSlide>
-					))}
-				</Swiper> */}
-			</div>
+							))}
+						</div>
+						{(posts) && <div className='sp-post-pagination'>
+							<a className='current' href='#'><span>1</span></a>
+							<a href='#'><span>2</span></a>
+							<a href='#'><span>Next</span></a>
+						</div>}
+					</div>
+				)}
+				{layout == 'carousel' && (
+					<Swiper
+						spaceBetween={30}
+						slidesPerView={gridColumn}
+						pagination={{ clickable: true }}
+						breakpoints={{
+							640: { slidesPerView: 1 },
+							768: { slidesPerView: 2 },
+							1024: { slidesPerView: gridColumn }
+						}}
+						autoplay={{
+							delay: 2000,
+							disableOnInteraction: false,
+							pauseOnMouseEnter: true,
+						}}
+						speed={600}
+						loop={true}
+						navigation={{
+							nextEl: swiperNavNextRef.current,
+							prevEl: swiperNavPrevRef.current,
+							enabled: true,
+						}}
+						modules={[
+							Navigation,
+							Pagination,
+							Scrollbar,
+							Grid,
+							Autoplay,
+							Keyboard,
+							Mousewheel,
+							EffectFade,
+							EffectCoverflow,
+							EffectFlip,
+							EffectCube,
+							FreeMode,
+						]} // Include Autoplay in modules
+					>
+						{posts && posts.map((post, index) => (
+							<SwiperSlide key={post.id}>
+								<div className="sp-post-item">
+									{showPostImage && media && media[index] ? (
+										<div className="sp-post-image">
+											<img src={media[index].source_url} alt={media[index].alt_text} />
+										</div>
+									) : null}
+									<div className="sp-post-body">
+										<h2 className="sp-post-title">
+											<a href={post.link}>{parse(post.title.rendered)}</a>
+										</h2>
+
+										{(showPostAuthor || showPostDate) && (
+											<div className="sp-post-meta">
+												{showPostAuthor && authors && authors[index] ? (
+													<span className="sp-post-author">
+														{__('By', 'sp-recent-post-showcase')} {linkToAuthorPage ? (
+															<a href={authors[index][0].link}>{authors[index][0].name}</a>
+														) : (
+															<span>{authors[index][0].name}</span>
+														)}
+													</span>
+												) : null}
+
+												{showPostDate ? (
+													<time
+														className="sp-post-date"
+														dateTime={post.date}
+													>
+														{__('On', 'sp-recent-post-showcase')} {new Date(post.date).toLocaleDateString(undefined, {
+															year: 'numeric',
+															month: 'long',
+															day: 'numeric',
+														})}
+													</time>
+												) : null}
+											</div>
+										)}
+
+										<div className="sp-post-content" dangerouslySetInnerHTML={{ __html: post.excerpt.rendered }} />
+
+										<div className="sp-post-btn">
+											<a className="sp-post-read-more" href={post.link}>
+												<span>{__('Read More', 'sp-recent-post-showcase')}</span>
+											</a>
+										</div>
+									</div>
+								</div>
+							</SwiperSlide>
+						))}
+					</Swiper>)}
+			</div >
 		</>
 	);
 }
