@@ -117,12 +117,12 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 
 
 					<ButtonGroup
-						className={`sp-team-button-group sp-team-component-mb`}
+						className={`sp-post-button-group sp-post-component-mb`}
 					>
-						<div className='sp-team-component-top'>
-							<label className='sp-team-component-title'>Layout</label>
+						<div className='sp-post-component-top'>
+							<label className='sp-post-component-title'>Layout</label>
 						</div>
-						<div className={`sp-team-button-group-list`}>
+						<div className={`sp-post-button-group-list`}>
 							{
 								layouts.map((item, i) => (
 									<Button className={(layout == item.value) ? 'active' : ''} key={i} value={item.value} onClick={(e) => {
